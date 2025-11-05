@@ -5,6 +5,8 @@ public class Especialidade {
     private String nome;
     private String descricao;
 
+    public Especialidade() {}
+
     public Especialidade(long id_especialidade, String nome, String descricao) {
         this.id_especialidade = id_especialidade;
         this.nome = nome;

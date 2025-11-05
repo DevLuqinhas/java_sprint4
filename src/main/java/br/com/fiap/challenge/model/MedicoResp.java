@@ -6,6 +6,8 @@ public class MedicoResp {
     private Telefone telefone;
     private Especialidade especialidade;
 
+    public MedicoResp() {}
+
     public MedicoResp(String nome, String crm, Telefone telefone, Especialidade especialidade) {
         this.nome = nome;
         this.crm = crm;

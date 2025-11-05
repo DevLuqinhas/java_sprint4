@@ -1,6 +1,6 @@
 package br.com.fiap.challenge.repository;
 
-import br.com.fiap.challenge.model.Consulta;
+import br.com.fiap.challenge.model.*;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -50,7 +50,22 @@ public class ConsultaRepository {
     }
 
     public List<Consulta> findAll() throws SQLException {
-        String sql = "SELECT * FROM tbl_consulta";
+        String sql = """
+        SELECT 
+            c.id_consulta,
+            c.data_hora_consulta,
+            c.status_consulta,
+            c.link_consulta,
+            m.nome_medico,
+            e.nome AS especialidade_nome,
+            p.nome_completo
+        FROM tbl_consulta c
+        JOIN tbl_medico m ON m.id_medico = c.id_medico
+        JOIN tbl_especialidade e ON e.id_especialidade = m.id_especialidade
+        JOIN tbl_paciente p ON p.id_paciente = c.id_paciente
+        ORDER BY c.data_hora_consulta ASC
+    """;
+
         List<Consulta> lista = new ArrayList<>();
         try (Connection con = cf.getConnection();
              PreparedStatement st = con.prepareStatement(sql);
@@ -113,11 +128,32 @@ public class ConsultaRepository {
     }
 
     private Consulta mapRowToConsulta(ResultSet rs) throws SQLException {
-        long id = rs.getLong("id_consulta");
-        LocalDateTime dataHora = rs.getTimestamp("data_hora_consulta").toLocalDateTime();
-        int status = rs.getInt("status_consulta");
-        String link = rs.getString("link_consulta");
+        Consulta c = new Consulta();
+        c.setId_consulta(rs.getLong("id_consulta"));
+        c.setData_hora_consulta(rs.getTimestamp("data_hora_consulta").toLocalDateTime());
+        c.setStatus_consulta(rs.getInt("status_consulta"));
+        c.setLink(rs.getString("link_consulta"));
 
-        return new Consulta(id, dataHora, null, status, null, link, null, null);
+        // Paciente
+        var paciente = new Paciente();
+        paciente.setNome(rs.getString("nome_completo"));
+        c.setPaciente(paciente);
+
+        // Médico + Especialidade
+        var medico = new MedicoResp();
+        medico.setNome(rs.getString("nome_medico"));
+
+        var especialidade = new Especialidade();
+        especialidade.setNome(rs.getString("especialidade_nome"));
+        medico.setEspecialidade(especialidade);
+
+        c.setMedico_resp(medico);
+
+        // Hospital
+        var hospital = new Hospital();
+        hospital.setNome(rs.getString("nome_hospital"));
+        c.setHospital(hospital);
+
+        return c;
     }
 }

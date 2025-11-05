@@ -9,6 +9,8 @@ public class Paciente {
     private Telefone telefone;
     private LocalDate dataNascimento;
 
+    public Paciente() {}
+
     public Paciente(long id_paciente, String nome, String cpf, LocalDate dataNascimento, Telefone telefone) {
         this.id_paciente = id_paciente;
         this.nome = nome;

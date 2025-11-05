@@ -5,6 +5,8 @@ public class Hospital {
     private Endereco endereco;
     private Telefone telefone;
 
+    public Hospital() {}
+
     public Hospital(String nome, Endereco endereco, Telefone telefone) {
         this.nome = nome;
         this.endereco = endereco;
