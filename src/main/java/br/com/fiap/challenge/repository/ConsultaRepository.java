@@ -57,12 +57,12 @@ public class ConsultaRepository {
             c.status_consulta,
             c.link_consulta,
             m.nome_medico,
-            e.nome AS especialidade_nome,
+            e.nome_especialidade AS especialidade_nome,
             p.nome_completo
         FROM tbl_consulta c
-        JOIN tbl_medico m ON m.id_medico = c.id_medico
-        JOIN tbl_especialidade e ON e.id_especialidade = m.id_especialidade
-        JOIN tbl_paciente p ON p.id_paciente = c.id_paciente
+        LEFT JOIN tbl_medico m ON m.id_medico = c.id_medico
+        LEFT JOIN tbl_especialidade e ON e.id_especialidade = m.id_especialidade
+        LEFT JOIN tbl_paciente p ON p.id_paciente = c.id_paciente
         ORDER BY c.data_hora_consulta ASC
     """;
 
