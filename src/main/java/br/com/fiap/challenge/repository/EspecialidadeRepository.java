@@ -23,6 +23,20 @@ public class EspecialidadeRepository {
         }
     }
 
+    public long findIdByNome(String nome) throws SQLException {
+        String sql = "SELECT id_especialidade FROM tbl_especialidade WHERE LOWER(nome) = LOWER(?)";
+        try (Connection con = cf.getConnection();
+             PreparedStatement st = con.prepareStatement(sql)) {
+            st.setString(1, nome);
+            try (ResultSet rs = st.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong("id_especialidade");
+                }
+            }
+        }
+        return 0;
+    }
+
     public Especialidade findById(long id) throws SQLException {
         String sql = "SELECT * FROM tbl_especialidade WHERE id_especialidade = ?";
         try (Connection con = cf.getConnection();

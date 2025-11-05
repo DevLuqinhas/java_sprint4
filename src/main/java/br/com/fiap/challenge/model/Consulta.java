@@ -12,7 +12,12 @@ public class Consulta {
     private Paciente paciente;
     private Hospital hospital;
 
-    public Consulta(long id_consulta, LocalDateTime data_hora_consulta, MedicoResp medico_resp, int status_consulta, Lembrete lembrete, String link, Paciente paciente, Hospital hospital) {
+    // ✅ Adicione este construtor padrão:
+    public Consulta() {}
+
+    public Consulta(long id_consulta, LocalDateTime data_hora_consulta, MedicoResp medico_resp,
+                    int status_consulta, Lembrete lembrete, String link,
+                    Paciente paciente, Hospital hospital) {
         this.id_consulta = id_consulta;
         this.data_hora_consulta = data_hora_consulta;
         this.medico_resp = medico_resp;

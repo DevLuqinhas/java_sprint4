@@ -26,6 +26,20 @@ public class PacienteRepository {
         }
     }
 
+    public long findIdByCpf(String cpf) throws SQLException {
+        String sql = "SELECT id_paciente FROM tbl_paciente WHERE cpf = ?";
+        try (Connection con = cf.getConnection();
+             PreparedStatement st = con.prepareStatement(sql)) {
+            st.setString(1, cpf);
+            try (ResultSet rs = st.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong("id_paciente");
+                }
+            }
+        }
+        return 0;
+    }
+
     public Paciente findById(long id) throws SQLException {
         String sql = "SELECT * FROM tbl_paciente WHERE id_paciente = ?";
         try (Connection con = cf.getConnection();

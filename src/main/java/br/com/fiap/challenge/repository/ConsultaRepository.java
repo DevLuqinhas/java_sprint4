@@ -11,10 +11,10 @@ public class ConsultaRepository {
 
     private ConnectionFactory cf = new ConnectionFactory();
 
-    public void create(Consulta c, long idPaciente, long idMedico, long idHospital) throws SQLException {
+    public long createReturningId(Consulta c, long idPaciente, long idMedico, long idHospital) throws SQLException {
         String sql = "INSERT INTO tbl_consulta (id_paciente, id_medico, id_hospital, data_hora_consulta, status_consulta, link_consulta) VALUES (?,?,?,?,?,?)";
         try (Connection con = cf.getConnection();
-             PreparedStatement st = con.prepareStatement(sql)) {
+             PreparedStatement st = con.prepareStatement(sql, new String[]{"id_consulta"})) {
 
             st.setLong(1, idPaciente);
             st.setLong(2, idMedico);
@@ -24,7 +24,14 @@ public class ConsultaRepository {
             st.setString(6, c.getLink());
 
             st.executeUpdate();
+
+            try (ResultSet rs = st.getGeneratedKeys()) {
+                if (rs.next()) {
+                    return rs.getLong(1);
+                }
+            }
         }
+        return 0;
     }
 
     public Consulta findById(long idConsulta) throws SQLException {
@@ -78,6 +85,31 @@ public class ConsultaRepository {
             st.setLong(1, idConsulta);
             return st.executeUpdate() > 0;
         }
+    }
+
+    public long selecionarMedicoDisponivel(long idEspecialidade, LocalDateTime dataConsulta) throws SQLException {
+        String sql = """
+            SELECT m.id_medico
+            FROM tbl_medico m
+            WHERE m.id_especialidade = ?
+              AND m.id_medico NOT IN (
+                    SELECT c.id_medico FROM tbl_consulta c WHERE c.data_hora_consulta = ?
+              )
+            AND ROWNUM = 1
+            """;
+
+        try (Connection con = cf.getConnection();
+             PreparedStatement st = con.prepareStatement(sql)) {
+            st.setLong(1, idEspecialidade);
+            st.setTimestamp(2, Timestamp.valueOf(dataConsulta));
+
+            try (ResultSet rs = st.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong("id_medico");
+                }
+            }
+        }
+        return 0;
     }
 
     private Consulta mapRowToConsulta(ResultSet rs) throws SQLException {
