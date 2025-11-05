@@ -39,6 +39,25 @@ public class MedicoRepository {
         return lista;
     }
 
+    public List<MedicoResp> findByEspecialidade(long idEspecialidade) throws SQLException {
+        List<MedicoResp> medicos = new ArrayList<>();
+        String sql = "SELECT * FROM tbl_medico WHERE id_especialidade = ?";
+
+        try (Connection con = cf.getConnection();
+             PreparedStatement st = con.prepareStatement(sql)) {
+
+            st.setLong(1, idEspecialidade);
+
+            try (ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    medicos.add(mapRowToMedico(rs));
+                }
+            }
+        }
+
+        return medicos;
+    }
+
     public MedicoResp findById(long id) throws SQLException {
         String sql = "SELECT * FROM tbl_medico WHERE id_medico=?";
         try (Connection con = cf.getConnection();
@@ -52,12 +71,12 @@ public class MedicoRepository {
     }
 
     public boolean update(MedicoResp m, long id) throws SQLException {
-        String sql = "UPDATE tbl_medico SET nome_medico=?, telefone_medico=?, especialidade_medico=? WHERE id_medico=?";
+        String sql = "UPDATE tbl_medico SET nome_medico=?, telefone_medico=?, id_especialidade=? WHERE id_medico=?";
         try (Connection con = cf.getConnection();
              PreparedStatement st = con.prepareStatement(sql)) {
             st.setString(1, m.getNome());
             st.setString(2, m.getTelefone().getNumeroTel());
-            st.setString(3, m.getEspecialidade().getNome());
+            st.setLong(3, m.getEspecialidade().getId_especialidade());
             st.setLong(4, id);
             return st.executeUpdate() > 0;
         }
@@ -76,7 +95,11 @@ public class MedicoRepository {
         String nome = rs.getString("nome_medico");
         String crm = rs.getString("crm_medico");
         Telefone tel = new Telefone(11, rs.getString("telefone_medico"));
-        Especialidade esp = new Especialidade(0, rs.getString("especialidade_medico"), "");
+        Especialidade esp = new Especialidade(
+                rs.getLong("id_especialidade"),
+                rs.getString("nome_especialidade"),
+                rs.getString("descricao_especialidade")
+        );
         return new MedicoResp(nome, crm, tel, esp);
     }
 }

@@ -11,14 +11,13 @@ public class ConnectionFactory {
     private String jdbc = "jdbc:oracle:thin:@oracle.fiap.com.br:1521:orcl";
 
     public Connection getConnection() throws SQLException {
-        Connection con = null;
+        Connection conn = null;
         try {
-            con = DriverManager.getConnection(jdbc, user, pwd);
-        }
-        catch(SQLException e) {
+            conn = DriverManager.getConnection(jdbc, user, pwd);
+        } catch (SQLException e) {
             e.printStackTrace();
             throw e;
         }
-        return con;
+        return conn;
     }
 }

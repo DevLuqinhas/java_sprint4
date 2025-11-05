@@ -1,4 +1,4 @@
-package br.com.fiap.challenge.businessmodel;
+package br.com.fiap.challenge.business;
 
 import br.com.fiap.challenge.model.Consulta;
 

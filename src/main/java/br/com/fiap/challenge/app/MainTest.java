@@ -1,6 +1,6 @@
 package br.com.fiap.challenge.app;
 
-import br.com.fiap.challenge.businessmodel.*;
+import br.com.fiap.challenge.business.*;
 import br.com.fiap.challenge.model.*;
 import br.com.fiap.challenge.repository.*;
 
