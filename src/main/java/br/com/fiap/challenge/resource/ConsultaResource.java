@@ -27,6 +27,12 @@ public class ConsultaResource {
     private final ConsultaBusiness consultaBusiness = new ConsultaBusiness();
     private final LembreteBusiness lembreteBusiness = new LembreteBusiness();
 
+    @OPTIONS
+    @Path("/{any: .*}")
+    public Response options() {
+        return Response.ok().build();
+    }
+
     @GET
     public Response listar() {
         try {
