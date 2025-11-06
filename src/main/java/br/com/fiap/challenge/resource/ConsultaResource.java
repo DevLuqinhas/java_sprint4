@@ -88,26 +88,45 @@ public class ConsultaResource {
 
     @PUT
     @Path("/{id}")
-    public Response reagendar(@PathParam("id") long id, Consulta c) {
+    public Response reagendar(@PathParam("id") long id, ConsultaDTO dto) {
         try {
-            c.setId_consulta(id);
-
-            if (!consultaBusiness.validarDataConsulta(c.getData_hora_consulta())) {
+            if (dto == null || dto.getDataConsulta() == null || dto.getHorarioConsulta() == null) {
                 return Response.status(Response.Status.BAD_REQUEST)
-                        .entity("Data inválida (não pode ser no passado)").build();
+                        .entity("Dados incompletos para reagendamento.").build();
             }
 
+            LocalDateTime novaDataHora = dto.toLocalDateTime();
+
+            if (!consultaBusiness.validarDataConsulta(novaDataHora)) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("Data inválida (o reagendamento deve ser para pelo menos 1 mês após a data atual).").build();
+            }
+
+            Consulta c = new Consulta();
+            c.setId_consulta(id);
+            c.setData_hora_consulta(novaDataHora);
+            c.setStatus_consulta(0); // mantém como agendada
+            c.setLink(null); // link inalterado
+
             boolean atualizado = consultaRepository.update(c);
+
             if (atualizado) {
-                return Response.ok("Consulta reagendada com sucesso").build();
+                return Response.ok("Consulta reagendada com sucesso!").build();
             } else {
-                return Response.status(Response.Status.NOT_FOUND).build();
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("Consulta não encontrada.").build();
             }
 
         } catch (SQLException e) {
+            e.printStackTrace();
             return Response.serverError().entity(e.getMessage()).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Erro ao processar a nova data: " + e.getMessage()).build();
         }
     }
+
 
     @DELETE
     @Path("/{id}")

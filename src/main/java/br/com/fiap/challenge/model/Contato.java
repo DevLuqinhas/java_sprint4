@@ -2,8 +2,6 @@ package br.com.fiap.challenge.model;
 
 import java.time.LocalDateTime;
 
-// atributo de Hospital ou Site.
-
 public class Contato {
     private long id_contato;
     private String nome;
@@ -11,9 +9,10 @@ public class Contato {
     private String mensagem;
     private LocalDateTime dataenvio;
     private int status_contato;
+    private Character formulario_origem;
+    private Integer nota;
 
-    public Contato() {
-    }
+    public Contato() {}
 
     public Contato(long id_contato, String nome, String email, String mensagem, LocalDateTime dataenvio, int status_contato) {
         this.id_contato = id_contato;
@@ -24,51 +23,28 @@ public class Contato {
         this.status_contato = status_contato;
     }
 
-    public long getId_contato() {
-        return id_contato;
-    }
+    // Getters e Setters
+    public long getId_contato() { return id_contato; }
+    public void setId_contato(long id_contato) { this.id_contato = id_contato; }
 
-    public void setId_contato(long id_contato) {
-        this.id_contato = id_contato;
-    }
+    public String getNome() { return nome; }
+    public void setNome(String nome) { this.nome = nome; }
 
-    public String getNome() {
-        return nome;
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
+    public String getMensagem() { return mensagem; }
+    public void setMensagem(String mensagem) { this.mensagem = mensagem; }
 
-    public String getEmail() {
-        return email;
-    }
+    public LocalDateTime getDataenvio() { return dataenvio; }
+    public void setDataenvio(LocalDateTime dataenvio) { this.dataenvio = dataenvio; }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    public int getStatus_contato() { return status_contato; }
+    public void setStatus_contato(int status_contato) { this.status_contato = status_contato; }
 
-    public String getMensagem() {
-        return mensagem;
-    }
+    public Character getFormulario_origem() { return formulario_origem; }
+    public void setFormulario_origem(Character formulario_origem) { this.formulario_origem = formulario_origem; }
 
-    public void setMensagem(String mensagem) {
-        this.mensagem = mensagem;
-    }
-
-    public LocalDateTime getDataenvio() {
-        return dataenvio;
-    }
-
-    public void setDataenvio(LocalDateTime dataenvio) {
-        this.dataenvio = dataenvio;
-    }
-
-    public int getStatus_contato() {
-        return status_contato;
-    }
-
-    public void setStatus_contato(int status_contato) {
-        this.status_contato = status_contato;
-    }
+    public Integer getNota() { return nota; }
+    public void setNota(Integer nota) { this.nota = nota; }
 }

@@ -116,12 +116,31 @@ public class ConsultaRepository {
     }
 
     public boolean delete(long idConsulta) throws SQLException {
-        String sql = "DELETE FROM tbl_consulta WHERE id_consulta = ?";
-        try (Connection con = cf.getConnection();
-             PreparedStatement st = con.prepareStatement(sql)) {
+        String deleteLembretes = "DELETE FROM tbl_lembrete WHERE id_consulta = ?";
+        String deleteConsulta = "DELETE FROM tbl_consulta WHERE id_consulta = ?";
 
-            st.setLong(1, idConsulta);
-            return st.executeUpdate() > 0;
+        try (Connection con = cf.getConnection()) {
+            try (PreparedStatement stLembrete = con.prepareStatement(deleteLembretes);
+                 PreparedStatement stConsulta = con.prepareStatement(deleteConsulta)) {
+
+                con.setAutoCommit(false);
+
+                // 1️⃣ Apaga lembretes relacionados
+                stLembrete.setLong(1, idConsulta);
+                stLembrete.executeUpdate();
+
+                // 2️⃣ Apaga consulta
+                stConsulta.setLong(1, idConsulta);
+                int linhasAfetadas = stConsulta.executeUpdate();
+
+                con.commit();
+                return linhasAfetadas > 0;
+            } catch (SQLException e) {
+                con.rollback();
+                throw e;
+            } finally {
+                con.setAutoCommit(true);
+            }
         }
     }
 

@@ -3,7 +3,6 @@ package br.com.fiap.challenge.resource;
 import br.com.fiap.challenge.model.Contato;
 import br.com.fiap.challenge.model.FormuContatoDTO;
 import br.com.fiap.challenge.repository.ContatoRepository;
-
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -18,29 +17,34 @@ public class ContatoResource {
 
     private final ContatoRepository repository = new ContatoRepository();
 
-    // ✅ Enviar (criar) um novo contato
     @POST
     public Response enviarContato(FormuContatoDTO dto) {
+        if (dto == null || !dto.isValid()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Dados inválidos.").build();
+        }
+
         try {
             Contato c = new Contato();
             c.setNome(dto.getNome());
             c.setEmail(dto.getEmail());
             c.setMensagem(dto.getMensagem());
+            c.setFormulario_origem(dto.getFormulario_origem());
+            c.setNota(dto.getNota());
             c.setDataenvio(LocalDateTime.now());
-            c.setStatus_contato(0); // 0 = recebido
+            c.setStatus_contato(0);
 
             repository.salvar(c);
-            return Response.status(Response.Status.CREATED).entity(c).build();
+            return Response.status(Response.Status.CREATED)
+                    .entity("Contato registrado com sucesso!").build();
 
         } catch (SQLException e) {
             e.printStackTrace();
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Erro ao salvar o contato no banco de dados.")
-                    .build();
+            return Response.serverError()
+                    .entity("Erro ao salvar o contato: " + e.getMessage()).build();
         }
     }
 
-    // ✅ Buscar todos os contatos
     @GET
     public Response listarTodos() {
         try {
@@ -48,13 +52,10 @@ public class ContatoResource {
             return Response.ok(lista).build();
         } catch (SQLException e) {
             e.printStackTrace();
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Erro ao buscar contatos.")
-                    .build();
+            return Response.serverError().entity("Erro ao buscar contatos.").build();
         }
     }
 
-    // ✅ Buscar contato por ID
     @GET
     @Path("/{id}")
     public Response buscarPorId(@PathParam("id") long id) {
@@ -65,34 +66,26 @@ public class ContatoResource {
             return Response.ok(c).build();
         } catch (SQLException e) {
             e.printStackTrace();
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Erro ao buscar o contato.")
-                    .build();
+            return Response.serverError().entity("Erro ao buscar contato.").build();
         }
     }
 
-    // ✅ Atualizar contato (ex: mudar status, corrigir dados)
     @PUT
     @Path("/{id}")
     public Response atualizarContato(@PathParam("id") long id, Contato c) {
         try {
             c.setId_contato(id);
             boolean atualizado = repository.update(c);
-
             if (atualizado)
                 return Response.ok("Contato atualizado com sucesso!").build();
             else
                 return Response.status(Response.Status.NOT_FOUND).entity("Contato não encontrado.").build();
-
         } catch (SQLException e) {
             e.printStackTrace();
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Erro ao atualizar o contato.")
-                    .build();
+            return Response.serverError().entity("Erro ao atualizar contato.").build();
         }
     }
 
-    // ✅ Excluir contato
     @DELETE
     @Path("/{id}")
     public Response deletarContato(@PathParam("id") long id) {
@@ -102,12 +95,9 @@ public class ContatoResource {
                 return Response.noContent().build();
             else
                 return Response.status(Response.Status.NOT_FOUND).entity("Contato não encontrado.").build();
-
         } catch (SQLException e) {
             e.printStackTrace();
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Erro ao deletar o contato.")
-                    .build();
+            return Response.serverError().entity("Erro ao deletar contato.").build();
         }
     }
 }
