@@ -64,21 +64,24 @@ public class ConsultaResource {
                         .entity("Nenhum médico disponível para esta especialidade neste horário.").build();
             }
 
-            // Monta objeto e insere no banco
+            // Monta objeto da consulta
             Consulta c = new Consulta();
             c.setData_hora_consulta(dataHora);
             c.setStatus_consulta(consultaBusiness.definirStatusConsulta(dataHora));
             c.setLink("https://meet.consulta/" + UUID.randomUUID());
 
             long idConsulta = consultaRepository.createReturningId(c, idPaciente, idMedico, idHospital);
-            c.setId_consulta(idConsulta);
+
+            // Buscar consulta completa para retornar
+            Consulta consultaCompleta = consultaRepository.findById(idConsulta);
 
             // Gera lembrete automático
-            lembreteBusiness.gerarLembreteAutomatico(c, 1L); // canal WhatsApp
+            lembreteBusiness.gerarLembreteAutomatico(consultaCompleta, 1L);
 
-            return Response.status(Response.Status.CREATED).entity(c).build();
+            return Response.status(Response.Status.CREATED).entity(consultaCompleta).build();
 
         } catch (SQLException e) {
+            e.printStackTrace();
             return Response.serverError().entity(e.getMessage()).build();
         }
     }

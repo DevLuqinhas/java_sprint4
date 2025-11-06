@@ -34,18 +34,37 @@ public class ConsultaRepository {
         return 0;
     }
 
-    public Consulta findById(long idConsulta) throws SQLException {
-        String sql = "SELECT * FROM tbl_consulta WHERE id_consulta = ?";
+    public Consulta findById(long id) throws SQLException {
+        String sql = """
+        SELECT 
+            c.id_consulta,
+            c.data_hora_consulta,
+            c.status_consulta,
+            c.link_consulta,
+            p.nome_completo AS nome_paciente,
+            m.nome_medico,
+            e.nome AS especialidade_nome,
+            h.nome_hospital
+        FROM tbl_consulta c
+        JOIN tbl_paciente p ON p.id_paciente = c.id_paciente
+        JOIN tbl_medico m ON m.id_medico = c.id_medico
+        JOIN tbl_especialidade e ON e.id_especialidade = m.id_especialidade
+        JOIN tbl_hospital h ON h.id_hospital = c.id_hospital
+        WHERE c.id_consulta = ?
+    """;
+
         try (Connection con = cf.getConnection();
              PreparedStatement st = con.prepareStatement(sql)) {
 
-            st.setLong(1, idConsulta);
+            st.setLong(1, id);
+
             try (ResultSet rs = st.executeQuery()) {
                 if (rs.next()) {
                     return mapRowToConsulta(rs);
                 }
             }
         }
+
         return null;
     }
 
@@ -56,19 +75,20 @@ public class ConsultaRepository {
             c.data_hora_consulta,
             c.status_consulta,
             c.link_consulta,
+            p.nome_completo AS nome_paciente,
             m.nome_medico,
             e.nome AS especialidade_nome,
-            p.nome_completo,
             h.nome_hospital
         FROM tbl_consulta c
-        LEFT JOIN tbl_medico m ON m.id_medico = c.id_medico
-        LEFT JOIN tbl_especialidade e ON e.id_especialidade = m.id_especialidade
-        LEFT JOIN tbl_paciente p ON p.id_paciente = c.id_paciente
-        LEFT JOIN tbl_hospital h ON h.id_hospital = c.id_hospital
+        JOIN tbl_paciente p ON p.id_paciente = c.id_paciente
+        JOIN tbl_medico m ON m.id_medico = c.id_medico
+        JOIN tbl_especialidade e ON e.id_especialidade = m.id_especialidade
+        JOIN tbl_hospital h ON h.id_hospital = c.id_hospital
         ORDER BY c.data_hora_consulta ASC
     """;
 
         List<Consulta> lista = new ArrayList<>();
+
         try (Connection con = cf.getConnection();
              PreparedStatement st = con.prepareStatement(sql);
              ResultSet rs = st.executeQuery()) {
@@ -77,6 +97,7 @@ public class ConsultaRepository {
                 lista.add(mapRowToConsulta(rs));
             }
         }
+
         return lista;
     }
 
@@ -104,33 +125,24 @@ public class ConsultaRepository {
         }
     }
 
-    public long selecionarMedicoDisponivel(long idEspecialidade, LocalDateTime dataConsulta) throws SQLException {
-        String sql = """
-            SELECT m.id_medico
-            FROM tbl_medico m
-            WHERE m.id_especialidade = ?
-              AND m.id_medico NOT IN (
-                    SELECT c.id_medico FROM tbl_consulta c WHERE c.data_hora_consulta = ?
-              )
-            AND ROWNUM = 1
-            """;
-
+    public long selecionarMedicoDisponivel(long idEspecialidade, LocalDateTime dataHora) throws SQLException {
+        String sql = "SELECT id_medico FROM tbl_medico WHERE id_especialidade = ? FETCH FIRST 1 ROWS ONLY";
         try (Connection con = cf.getConnection();
              PreparedStatement st = con.prepareStatement(sql)) {
-            st.setLong(1, idEspecialidade);
-            st.setTimestamp(2, Timestamp.valueOf(dataConsulta));
 
+            st.setLong(1, idEspecialidade);
             try (ResultSet rs = st.executeQuery()) {
                 if (rs.next()) {
                     return rs.getLong("id_medico");
                 }
             }
         }
-        return 0;
+        return 0; // Nenhum médico encontrado
     }
 
     private Consulta mapRowToConsulta(ResultSet rs) throws SQLException {
         Consulta c = new Consulta();
+
         c.setId_consulta(rs.getLong("id_consulta"));
 
         Timestamp ts = rs.getTimestamp("data_hora_consulta");
@@ -141,20 +153,23 @@ public class ConsultaRepository {
         c.setStatus_consulta(rs.getInt("status_consulta"));
         c.setLink(rs.getString("link_consulta"));
 
-        var paciente = new Paciente();
-        paciente.setNome(rs.getString("nome_completo"));
+        // Paciente
+        Paciente paciente = new Paciente();
+        paciente.setNome(rs.getString("nome_paciente"));
         c.setPaciente(paciente);
 
-        var medico = new MedicoResp();
+        // Médico + Especialidade
+        MedicoResp medico = new MedicoResp();
         medico.setNome(rs.getString("nome_medico"));
 
-        var especialidade = new Especialidade();
+        Especialidade especialidade = new Especialidade();
         especialidade.setNome(rs.getString("especialidade_nome"));
         medico.setEspecialidade(especialidade);
 
         c.setMedico_resp(medico);
 
-        var hospital = new Hospital();
+        // Hospital (opcional)
+        Hospital hospital = new Hospital();
         hospital.setNome(rs.getString("nome_hospital"));
         c.setHospital(hospital);
 
