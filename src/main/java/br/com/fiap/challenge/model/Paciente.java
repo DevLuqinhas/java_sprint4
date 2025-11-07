@@ -1,7 +1,9 @@
 package br.com.fiap.challenge.model;
 
 import java.time.LocalDate;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 
+@RegisterForReflection
 public class Paciente {
     private long id_paciente;
     private String nome;

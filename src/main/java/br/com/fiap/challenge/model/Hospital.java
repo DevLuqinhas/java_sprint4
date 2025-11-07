@@ -1,5 +1,7 @@
 package br.com.fiap.challenge.model;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 
+@RegisterForReflection
 public class Hospital {
     private String nome;
     private Endereco endereco;

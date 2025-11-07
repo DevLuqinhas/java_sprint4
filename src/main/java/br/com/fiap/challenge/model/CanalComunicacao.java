@@ -1,5 +1,8 @@
 package br.com.fiap.challenge.model;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
+
+@RegisterForReflection
 public class CanalComunicacao {
     private long id_canal_comu;
     private String nome;

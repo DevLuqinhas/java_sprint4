@@ -1,7 +1,9 @@
 package br.com.fiap.challenge.model;
 
 import java.time.LocalDateTime;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 
+@RegisterForReflection
 public class Consulta {
     private long id_consulta;
     private LocalDateTime data_hora_consulta;

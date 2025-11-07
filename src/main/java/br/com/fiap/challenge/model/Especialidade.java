@@ -1,5 +1,7 @@
 package br.com.fiap.challenge.model;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 
+@RegisterForReflection
 public class Especialidade {
     private long id_especialidade;
     private String nome;
